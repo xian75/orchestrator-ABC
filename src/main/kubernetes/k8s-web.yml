@@ -1,0 +1,50 @@
+# web-deployment.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator-abc-web
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orchestrator-abc-web
+  template:
+    metadata:
+      labels:
+        app: orchestrator-abc-web
+    spec:
+      containers:
+      - name: orchestrator-abc-web
+        image: noah/orchestrator-abc
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 9094
+          name: o-abc-web-port
+        env:
+          - name: POSTGRES_DB
+            value: db_abc
+          - name: POSTGRES_USER
+            value: username_abc
+          - name: POSTGRES_PASSWORD
+            value: password_abc
+        #resources:
+        #  limits:
+        #    memory: 250M
+        #    cpu: 500m
+---
+# web-service.yml
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator-abc-web-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: orchestrator-abc-web
+  ports:
+  - name: o-abc-web-port
+    port: 9980 # porta esterna del servizio in Docker
+    targetPort: 9094 # porta interna del servizio in Docker
+    nodePort: 30980 # porta esterna del cluster in Kubernetes (l'unica esposta su localhost)
