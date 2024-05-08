@@ -9,11 +9,11 @@ import io.smallrye.mutiny.Uni;
 import it.noah.common.ABCEventDetails;
 import it.noah.common.ABEventDetails;
 import it.noah.common.SingleABCEventDetails;
+import it.noah.sagacqrs.dao.dto.Participant;
+import it.noah.sagacqrs.orchestrator.Orchestrator;
 import it.noah.orchestrator.clients.ClientA;
 import it.noah.orchestrator.clients.ClientB;
 import it.noah.orchestrator.clients.ClientC;
-import it.noah.sagacqrs.dao.dto.Participant;
-import it.noah.sagacqrs.orchestrator.Orchestrator;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -86,12 +86,29 @@ public class ResourceABC implements Serializable {
     }
 
     @GET
+    @Path("/logdelete/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> logicallyDelete(@PathParam(value = "id") Long id, @QueryParam(value = "optlock") Long optlock) {
+        return orchestrator.saga("LOGICAL_DELETE_ABC", new ABCEventDetails(id, optlock));
+    }
+
+    @GET
     @Path("/update/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> update(@PathParam(value = "id") Long id, @QueryParam(value = "optlock") Long optlock,
             @QueryParam(value = "prefix") String titlePrefix) {
         return orchestrator.saga("UPDATE_ABC", new ABCEventDetails(id, optlock, titlePrefix));
+    }
+
+    @GET
+    @Path("/logupdate/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> updateArchiving(@PathParam(value = "id") Long id, @QueryParam(value = "optlock") Long optlock,
+            @QueryParam(value = "prefix") String titlePrefix) {
+        return orchestrator.saga("UPDATE_ARCHIVING_ABC", new ABCEventDetails(id, optlock, titlePrefix));
     }
 
     @GET
