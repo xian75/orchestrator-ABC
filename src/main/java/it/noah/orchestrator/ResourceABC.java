@@ -6,6 +6,7 @@ package it.noah.orchestrator;
 
 import io.quarkus.runtime.Startup;
 import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.pgclient.PgPool;
 import it.noah.common.ABCEventDetails;
 import it.noah.common.ABEventDetails;
 import it.noah.common.SingleABCEventDetails;
@@ -46,6 +47,9 @@ public class ResourceABC implements Serializable {
     Logger log;
 
     @Inject
+    PgPool dbPool;
+
+    @Inject
     Orchestrator orchestrator;
 
     @Inject
@@ -62,7 +66,7 @@ public class ResourceABC implements Serializable {
 
     @PostConstruct
     void init() {
-        orchestrator.init(log,
+        orchestrator.init(log, dbPool,
                 new Participant(clientA),
                 new Participant(clientB),
                 new Participant(clientC));
